@@ -312,6 +312,16 @@ function checkForGameOver() {
         console.log("Email người dùng để lưu điểm số:", email);
         showPopup("Game Over!");
         document.removeEventListener("keydown", control);
+        
+        // Kiểm tra các mốc điểm để hiển thị thông báo chúc mừng
+        if (score >= 5000) {
+            showPopup("Chúc mừng! Bạn đã đạt được móc 5000 điểm với 3 phần thưởng.");
+        } else if (score >= 2000) {
+            showPopup("Chúc mừng! Bạn đã đạt được móc 2000 điểm với 2 phần thưởng");
+        } else if (score >= 1000) {
+            showPopup("Chúc mừng! Bạn đã đạt được móc 1000 điểm với 1 phần thưởng");
+        }
+
         if (email) {
             saveScore(email, score); // Lưu điểm số khi thua
         } else {
@@ -320,6 +330,7 @@ function checkForGameOver() {
         setTimeout(clear, 3000);
     }
 }
+
 
     
 async function getHighScore(email) {
@@ -368,6 +379,7 @@ async function saveScore(email, score) {
             restartGame(); // Gọi hàm khởi động lại trò chơi
         };
     }
+    
     function restartGame() {
         // Xóa nội dung các ô
         squares.forEach(square => (square.innerHTML = 0));
