@@ -1,14 +1,26 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+import {
+    getFirestore,
+    doc,
+    setDoc,
+    getDoc,
+    collection,
+    getDocs,
+    query,
+    orderBy,
+    limit,
+    onSnapshot
+} from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
 
-let email; 
 
 document.addEventListener("DOMContentLoaded", () => {
     const gridDisplay = document.querySelector(".grid")
     const scoreDisplay = document.querySelector("#score")
     const resultDisplay = document.querySelector("#result")
+
 
     const width = 4
     let squares = []
@@ -25,7 +37,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth();
-
+    let email; 
+    loadLeaderboardRealTime(); 
         // Lấy email của người dùng đã đăng nhập
         auth.onAuthStateChanged(user => {
             if (user) {
@@ -48,6 +61,33 @@ document.addEventListener("DOMContentLoaded", () => {
             console.log("No such document!");
         }
     }
+    //bảng điểm 
+    function loadLeaderboardRealTime() {
+        const scoresCollection = collection(db, "scores");
+        onSnapshot(scoresCollection, snapshot => {
+            const leaderboardBody = document.getElementById("leaderboard-body");
+            leaderboardBody.innerHTML = ""; // Xóa nội dung cũ trong bảng
+    
+            const scoresData = snapshot.docs.map(doc => {
+                return { id: doc.id, ...doc.data() }; // Lưu ID tài liệu (email)
+            });
+            scoresData.sort((a, b) => b.highScore - a.highScore); // Sắp xếp theo highScore
+    
+            scoresData.forEach((player, index) => {
+                const row = document.createElement("tr");
+                const playerCell = document.createElement("td");
+                const scoreCell = document.createElement("td");
+    
+                playerCell.textContent = player.id || `Player ${index + 1}`; // Hiển thị email từ ID tài liệu
+                scoreCell.textContent = player.highScore || 0; // Hiển thị điểm cao nhất
+    
+                row.appendChild(playerCell);
+                row.appendChild(scoreCell);
+                leaderboardBody.appendChild(row);
+            });
+        });
+    }
+    
     // create the playing board
     function createBoard() {
         for (let i = 0; i < width * width; i++) {
@@ -226,10 +266,10 @@ document.addEventListener("DOMContentLoaded", () => {
     function checkForWin() {
         for (let i = 0; i < squares.length; i++) {
             if (squares[i].innerHTML == 2048) {
-                resultDisplay.innerHTML = "You WIN!";
+                showPopup("You WIN!");
                 document.removeEventListener("keydown", control);
-                saveScore(email, score); // Lưu điểm số 
-                setTimeout(clear, 3000);
+                saveScore(email, score); // Lưu điểm số khi thắng
+                return;
             }
         }
     }
@@ -246,28 +286,7 @@ auth.onAuthStateChanged(user => {
     }
 });
 
-// Trong hàm checkForGameOver
-function checkForGameOver() {
-    let zeros = 0;
-    for (let i = 0; i < squares.length; i++) {
-        if (squares[i].innerHTML == 0) {
-            zeros++;
-        }
-    }
-    if (zeros === 0) {
-        console.log("Trò chơi kết thúc: Không còn số 0");
-        console.log("Điểm số cuối cùng trước khi lưu:", score);
-        console.log("Email người dùng để lưu điểm số:", email);
-        resultDisplay.innerHTML = "Bạn THUA!";
-        document.removeEventListener("keydown", control);
-        if (email) {
-            saveScore(email, score); // Lưu điểm số khi thua
-        } else {
-            console.error("Không thể lưu điểm số, email không xác định.");
-        }
-        setTimeout(clear, 3000);
-    }
-}
+
 // Lấy email của người dùng đã đăng nhập
 auth.onAuthStateChanged(user => {
     if (user) {
@@ -291,7 +310,7 @@ function checkForGameOver() {
         console.log("Trò chơi kết thúc: Không còn số 0");
         console.log("Điểm số cuối cùng trước khi lưu:", score);
         console.log("Email người dùng để lưu điểm số:", email);
-        resultDisplay.innerHTML = "Bạn THUA!";
+        showPopup("Game Over!");
         document.removeEventListener("keydown", control);
         if (email) {
             saveScore(email, score); // Lưu điểm số khi thua
@@ -335,6 +354,34 @@ async function saveScore(email, score) {
     function clear() {
         clearInterval(myTimer)
     }
+    function showPopup(message) {
+        const popup = document.getElementById("game-over-popup");
+        const messageDisplay = document.getElementById("game-over-message");
+        const okButton = document.getElementById("ok-button");
+    
+        messageDisplay.textContent = message;
+        popup.classList.remove("hidden");
+    
+        // Xử lý khi nhấn nút OK
+        okButton.onclick = () => {
+            popup.classList.add("hidden");
+            restartGame(); // Gọi hàm khởi động lại trò chơi
+        };
+    }
+    function restartGame() {
+        // Xóa nội dung các ô
+        squares.forEach(square => (square.innerHTML = 0));
+        score = 0;
+        document.getElementById("score").textContent = score;
+    
+        // Tạo bảng mới
+        generate();
+        generate();
+    
+        // Thêm lại sự kiện bàn phím
+        document.addEventListener("keydown", control);
+    }
+    
 
     //add colours
     function addColours() {
