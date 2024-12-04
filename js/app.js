@@ -268,11 +268,22 @@ document.addEventListener("DOMContentLoaded", () => {
             if (squares[i].innerHTML == 2048) {
                 showPopup("You WIN!");
                 document.removeEventListener("keydown", control);
-                saveScore(email, score); // Lưu điểm số khi thắng
+    
+                if (email) {
+                    saveScore(email, score).then(() => {
+                        console.log("Điểm số đã được lưu.");
+                    }).catch((error) => {
+                        console.error("Lỗi khi lưu điểm:", error);
+                    });
+                } else {
+                    console.error("Không có email để lưu điểm.");
+                }
+    
                 return;
             }
         }
     }
+    
 
     //check if there are no zeros on the board to lose
 // Lấy email của người dùng đã đăng nhập
@@ -329,11 +340,23 @@ function checkForGameOver() {
             }
         });
 
+        // Lưu điểm số
+        if (email) {
+            saveScore(email, score).then(() => {
+                console.log("Điểm số đã được lưu.");
+            }).catch((error) => {
+                console.error("Lỗi khi lưu điểm:", error);
+            });
+        } else {
+            console.error("Không có email để lưu điểm.");
+        }
+
         showPopup("Game Over!");
         document.removeEventListener("keydown", control);
         setTimeout(clear, 3000);
     }
 }
+
 
 
 
