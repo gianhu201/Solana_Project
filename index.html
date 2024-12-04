@@ -4,14 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <title>2048</title>
-   
+
     <link rel="stylesheet" href="css/style.css" />
     
     <script type="module" src="js/app.js"></script>
     <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
     <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
     <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
-
+    <script src="https://unpkg.com/@solana/web3.js@latest/dist/web3.min.js"></script>
+    <script src="https://unpkg.com/@solana/spl-token@latest/dist/spl-token.min.js"></script>
+    
 </head>
 
 <body>
@@ -23,6 +25,7 @@
                 <h2 id="username">User: <span id="userNameDisplay"></span></h2>
                 <h2>High Score: <span id="highScoreDisplay">0</span></h2>
                 <p class="score-title">Your Score: <span id="user-score">0</span></p>
+                <button id="connect-button">Kết Nối Ví Phantom</button> <!-- Nút kết nối ví -->
             </div>
             <div class="score-container">
                 <p class="score-title">score</p>
@@ -52,9 +55,24 @@
             <button id="ok-button">OK</button>
         </div>
     </div>
-    
 
     <script type="module">
+        document.getElementById("connect-button").onclick = async () => {
+            const provider = window.solana;
+
+            if (provider && provider.isPhantom) {
+                try {
+                    const response = await provider.connect();
+                    console.log("Kết nối ví thành công:", response.publicKey.toString());
+                    alert("Kết nối ví thành công: " + response.publicKey.toString());
+                } catch (err) {
+                    console.error("Kết nối bị từ chối:", err);
+                    alert("Bạn đã từ chối yêu cầu kết nối. Vui lòng cho phép kết nối ví để tiếp tục.");
+                }
+            } else {
+                alert("Vui lòng cài đặt ví Phantom.");
+            }
+        };
     </script>
     <!-- Bootstrap JavaScript Libraries -->
     

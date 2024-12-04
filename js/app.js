@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const gridDisplay = document.querySelector(".grid")
     const scoreDisplay = document.querySelector("#score")
     const resultDisplay = document.querySelector("#result")
-
+ 
 
     const width = 4
     let squares = []
@@ -309,27 +309,32 @@ function checkForGameOver() {
     if (zeros === 0) {
         console.log("Trò chơi kết thúc: Không còn số 0");
         console.log("Điểm số cuối cùng trước khi lưu:", score);
-        console.log("Email người dùng để lưu điểm số:", email);
-        showPopup("Game Over!");
-        document.removeEventListener("keydown", control);
-        
-        // Kiểm tra các mốc điểm để hiển thị thông báo chúc mừng
+
+        let rewardAmount = 0;
         if (score >= 5000) {
-            showPopup("Chúc mừng! Bạn đã đạt được móc 5000 điểm với 3 phần thưởng.");
+            rewardAmount = 3; // Giả định mỗi phần thưởng là 1 SOL
+            showPopup("Chúc mừng! Bạn đã đạt 5000 điểm! Nhận 3 phần thưởng.");
         } else if (score >= 2000) {
-            showPopup("Chúc mừng! Bạn đã đạt được móc 2000 điểm với 2 phần thưởng");
+            rewardAmount = 2; // Giả định mỗi phần thưởng là 1 SOL
+            showPopup("Chúc mừng! Bạn đã đạt 2000 điểm! Nhận 2 phần thưởng.");
         } else if (score >= 1000) {
-            showPopup("Chúc mừng! Bạn đã đạt được móc 1000 điểm với 1 phần thưởng");
+            rewardAmount = 1; // Giả định mỗi phần thưởng là 1 SOL
+            showPopup("Chúc mừng! Bạn đã đạt 1000 điểm! Nhận 1 phần thưởng.");
         }
 
-        if (email) {
-            saveScore(email, score); // Lưu điểm số khi thua
-        } else {
-            console.error("Không thể lưu điểm số, email không xác định.");
-        }
+        // Kết nối ví và gửi thưởng
+        connectWallet().then((walletAddress) => {
+            if (walletAddress) {
+                sendReward(walletAddress, rewardAmount);
+            }
+        });
+
+        showPopup("Game Over!");
+        document.removeEventListener("keydown", control);
         setTimeout(clear, 3000);
     }
 }
+
 
 
     
@@ -393,6 +398,46 @@ async function saveScore(email, score) {
         // Thêm lại sự kiện bàn phím
         document.addEventListener("keydown", control);
     }
+    async function connectWallet() {
+        const provider = window.solana;
+    
+        if (provider && provider.isPhantom) {
+            try {
+                const response = await provider.connect();
+                console.log("Kết nối ví thành công:", response.publicKey.toString());
+                return response.publicKey.toString();
+            } catch (err) {
+                console.error("Kết nối bị từ chối:", err);
+                alert("Bạn đã từ chối yêu cầu kết nối. Vui lòng cho phép kết nối ví để tiếp tục.");
+            }
+        } else {
+            alert("Vui lòng cài đặt ví Phantom.");
+        }
+    }
+    
+    async function sendReward(walletAddress, amount) {
+        const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl('mainnet-beta'), 'confirmed');
+        
+        const fromWallet = solanaWeb3.Keypair.generate(); // Ví bạn sử dụng để gửi token
+        const toWallet = new solanaWeb3.PublicKey(walletAddress);
+    
+        // Số lượng token (cần phải có token đã được tạo trên mạng)
+        const transaction = new solanaWeb3.Transaction().add(
+            solanaWeb3.SystemProgram.transfer({
+                fromPubkey: fromWallet.publicKey,
+                toPubkey: toWallet,
+                lamports: amount * solanaWeb3.LAMPORTS_PER_SOL, // Chuyển đổi SOL sang lamports
+            })
+        );
+    
+        const signature = await solanaWeb3.sendAndConfirmTransaction(connection, transaction, {
+            signers: [fromWallet],
+        });
+    
+        console.log("Đã gửi phần thưởng:", signature);
+    }
+    
+    
     
 
     //add colours
