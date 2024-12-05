@@ -527,6 +527,28 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
+    // Xử lý sự kiện khi người dùng nhấn nút Log Out
+    document.getElementById("logout-button").addEventListener("click", function () {
+        // Xóa cookie của userEmail
+        document.cookie = "userEmail=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
+        // Chuyển hướng về trang login
+        window.location.href = "login.html"; // Đảm bảo file login.html có tồn tại
+    });
+
+    // Hàm kiểm tra cookie userEmail và chuyển hướng nếu không tồn tại
+    function checkLoginStatus() {
+        const cookies = document.cookie.split("; ");
+        const userEmailCookie = cookies.find(cookie => cookie.startsWith("userEmail="));
+        if (!userEmailCookie) {
+            // Không có cookie userEmail, chuyển hướng về trang login
+            window.location.href = "login.html";
+        }
+    }
+
+    // Kiểm tra trạng thái đăng nhập ngay khi tải trang
+    checkLoginStatus();
+
 
 
     //add colours

@@ -25,10 +25,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
+
+            // Đăng nhập thành công
             alert("Đăng nhập thành công!");
+
+            // Lưu email vào cookie với thời gian tồn tại 5 giờ
+            setCookie("userEmail", email, 5);
+
+            // Chuyển hướng sang trang chính
             window.location.href = "index.html";
         } catch (error) {
             alert("Đăng nhập thất bại: " + error.message);
         }
     });
-});v
+});
+
+// Hàm lưu cookie
+function setCookie(name, value, hours) {
+    const date = new Date();
+    date.setTime(date.getTime() + hours * 60 * 60 * 1000); // Đặt thời gian hết hạn
+    const expires = "expires=" + date.toUTCString();
+    document.cookie = name + "=" + value + ";" + expires + ";path=/";
+}
+

@@ -41,6 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         
             alert("Tài khoản đã được đăng ký thành công!");
+            window.location.href = "login.html";
         } catch (error) {
             if (error.code === 'auth/email-already-in-use') {
                 alert("Email này đã được sử dụng. Vui lòng chọn email khác.");
