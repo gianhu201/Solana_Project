@@ -322,20 +322,39 @@ function checkForGameOver() {
         console.log("Điểm số cuối cùng trước khi lưu:", score);
 
         let rewardAmount = 0;
+
+        // Liên kết điểm với thông báo
+        const rewardMessages = {
+            1: "Bạn đã đạt 1000 điểm! Nhận 1 phần thưởng.",
+            2: "Bạn đã đạt 2000 điểm! Nhận 2 phần thưởng.",
+            3: "Bạn đã đạt 5000 điểm! Nhận 3 phần thưởng."
+        };
+
         if (score >= 5000) {
-            rewardAmount = 3; // Giả định mỗi phần thưởng là 1 SOL
-            showPopup("Chúc mừng! Bạn đã đạt 5000 điểm! Nhận 3 phần thưởng.");
+            rewardAmount = 3;
         } else if (score >= 2000) {
-            rewardAmount = 2; // Giả định mỗi phần thưởng là 1 SOL
-            showPopup("Chúc mừng! Bạn đã đạt 2000 điểm! Nhận 2 phần thưởng.");
+            rewardAmount = 2;
         } else if (score >= 1000) {
-            rewardAmount = 1; // Giả định mỗi phần thưởng là 1 SOL
-            showPopup("Chúc mừng! Bạn đã đạt 1000 điểm! Nhận 1 phần thưởng.");
+            rewardAmount = 1;
         }
 
-        // Kết nối ví và gửi thưởng
+        // Random xác suất nhận phần thưởng
+        const isLucky = Math.random() < 0.5; // 50% cơ hội nhận quà
+
+        if (rewardAmount > 0 && isLucky) {
+            // Người chơi may mắn nhận thưởng
+            showPopup(`Chúc mừng! ${rewardMessages[rewardAmount]}`);
+        } else if (rewardAmount > 0) {
+            // Người chơi không nhận thưởng
+            showPopup(`Bạn đã đạt ${score} điểm! Tiếp tục cố gắng để thử vận may.`);
+        } else {
+            // Dưới 1000 điểm
+            showPopup(`Bạn đã đạt ${score} điểm! Tiếp tục cố gắng để nhận phần thưởng.`);
+        }
+
+        // Kết nối ví và gửi thưởng nếu có
         connectWallet().then((walletAddress) => {
-            if (walletAddress) {
+            if (walletAddress && isLucky) {
                 sendReward(walletAddress, rewardAmount);
             }
         });
@@ -351,11 +370,12 @@ function checkForGameOver() {
             console.error("Không có email để lưu điểm.");
         }
 
-        showPopup("Game Over!");
+        // Kết thúc trò chơi
         document.removeEventListener("keydown", control);
         setTimeout(clear, 3000);
     }
 }
+
 
 
 
