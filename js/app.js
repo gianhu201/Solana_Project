@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const gridDisplay = document.querySelector(".grid")
     const scoreDisplay = document.querySelector("#score")
     const resultDisplay = document.querySelector("#result")
- 
+
 
     const width = 4
     let squares = []
@@ -33,26 +33,26 @@ document.addEventListener("DOMContentLoaded", () => {
         messagingSenderId: "720719138643",
         appId: "1:720719138643:web:881b09fc16552cc0d5dba6"
     };
-    
+
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth();
-    let email; 
-    loadLeaderboardRealTime(); 
-        // Lấy email của người dùng đã đăng nhập
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                email = user.email;
-                document.getElementById("userNameDisplay").textContent = email; // Hiển thị email
-                getScore(email); // Lấy điểm số cho người dùng
-                getHighScore(email); // Lấy điểm số cao nhất cho người dùng
-            } else {
-                console.log("No user is signed in.");
-            }
-        });
-        
-        
-            async function getScore(email) {
+    let email;
+    loadLeaderboardRealTime();
+    // Lấy email của người dùng đã đăng nhập
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            email = user.email;
+            document.getElementById("userNameDisplay").textContent = email; // Hiển thị email
+            getScore(email); // Lấy điểm số cho người dùng
+            getHighScore(email); // Lấy điểm số cao nhất cho người dùng
+        } else {
+            console.log("No user is signed in.");
+        }
+    });
+
+
+    async function getScore(email) {
         const docRef = doc(db, "scores", email);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
@@ -67,27 +67,30 @@ document.addEventListener("DOMContentLoaded", () => {
         onSnapshot(scoresCollection, snapshot => {
             const leaderboardBody = document.getElementById("leaderboard-body");
             leaderboardBody.innerHTML = ""; // Xóa nội dung cũ trong bảng
-    
+
             const scoresData = snapshot.docs.map(doc => {
                 return { id: doc.id, ...doc.data() }; // Lưu ID tài liệu (email)
             });
             scoresData.sort((a, b) => b.highScore - a.highScore); // Sắp xếp theo highScore
-    
+
             scoresData.forEach((player, index) => {
                 const row = document.createElement("tr");
                 const playerCell = document.createElement("td");
                 const scoreCell = document.createElement("td");
-    
+
                 playerCell.textContent = player.id || `Player ${index + 1}`; // Hiển thị email từ ID tài liệu
                 scoreCell.textContent = player.highScore || 0; // Hiển thị điểm cao nhất
-    
+
                 row.appendChild(playerCell);
                 row.appendChild(scoreCell);
                 leaderboardBody.appendChild(row);
             });
         });
     }
-    
+    document.getElementById("new-game-button").addEventListener("click", () => {
+        restartGame();
+    });
+
     // create the playing board
     function createBoard() {
         for (let i = 0; i < width * width; i++) {
@@ -268,7 +271,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (squares[i].innerHTML == 2048) {
                 showPopup("You WIN!");
                 document.removeEventListener("keydown", control);
-    
+
                 if (email) {
                     saveScore(email, score).then(() => {
                         console.log("Điểm số đã được lưu.");
@@ -278,136 +281,173 @@ document.addEventListener("DOMContentLoaded", () => {
                 } else {
                     console.error("Không có email để lưu điểm.");
                 }
-    
+
                 return;
             }
         }
     }
-    
+    function checkForWin() {
+        for (let i = 0; i < squares.length; i++) {
+            if (squares[i].innerHTML == 2048) {
+                // Hiển thị popup thông báo thắng
+                showPopup("You WIN!");
+                document.removeEventListener("keydown", control);
+
+                // Lưu điểm nếu có email
+                if (email) {
+                    saveScore(email, score).then(() => {
+                        console.log("Điểm số đã được lưu.");
+                    }).catch((error) => {
+                        console.error("Lỗi khi lưu điểm:", error);
+                    });
+                } else {
+                    console.error("Không có email để lưu điểm.");
+                }
+
+                // Xác định tỷ lệ nhận phần thưởng (50%)
+                const rewardChance = Math.random() < 0.5; // 50% tỷ lệ
+                if (rewardChance) {
+                    showPopup("Congratulations! You've received a reward! Keep playing for more rewards.");
+                } else {
+                    showPopup("You've won! Keep playing to try your luck for a reward.");
+                }
+
+                // Cho phép tiếp tục chơi
+                continueGame();
+
+                return; // Thoát khỏi hàm khi điều kiện thắng được xử lý
+            }
+        }
+    }
+    // Hàm tiếp tục trò chơi
+    function continueGame() {
+        // Cho phép người chơi tiếp tục di chuyển
+        document.addEventListener("keydown", control);
+    }
 
     //check if there are no zeros on the board to lose
-// Lấy email của người dùng đã đăng nhập
-auth.onAuthStateChanged(user => {
-    if (user) {
-        email = user.email; // Sửa đổi biến toàn cục
-        document.getElementById("userNameDisplay").textContent = email; // Hiển thị email
-        getScore(email); // Lấy điểm số cho người dùng
-    } else {
-        console.log("No user is signed in.");
-    }
-});
-
-
-// Lấy email của người dùng đã đăng nhập
-auth.onAuthStateChanged(user => {
-    if (user) {
-        email = user.email; // Sửa đổi biến toàn cục
-        document.getElementById("userNameDisplay").textContent = email; // Hiển thị email
-        getScore(email); // Lấy điểm số cho người dùng
-    } else {
-        console.log("No user is signed in.");
-    }
-});
-
-// Trong hàm checkForGameOver
-function checkForGameOver() {
-    let zeros = 0;
-    for (let i = 0; i < squares.length; i++) {
-        if (squares[i].innerHTML == 0) {
-            zeros++;
-        }
-    }
-    if (zeros === 0) {
-        console.log("Trò chơi kết thúc: Không còn số 0");
-        console.log("Điểm số cuối cùng trước khi lưu:", score);
-
-        let rewardAmount = 0;
-
-        // Liên kết điểm với thông báo
-        const rewardMessages = {
-            1: "Bạn đã đạt 1000 điểm! Nhận 1 phần thưởng.",
-            2: "Bạn đã đạt 2000 điểm! Nhận 2 phần thưởng.",
-            3: "Bạn đã đạt 5000 điểm! Nhận 3 phần thưởng."
-        };
-
-        if (score >= 5000) {
-            rewardAmount = 3;
-        } else if (score >= 2000) {
-            rewardAmount = 2;
-        } else if (score >= 1000) {
-            rewardAmount = 1;
-        }
-
-        // Random xác suất nhận phần thưởng
-        const isLucky = Math.random() < 0.5; // 50% cơ hội nhận quà
-
-        if (rewardAmount > 0 && isLucky) {
-            // Người chơi may mắn nhận thưởng
-            showPopup(`Chúc mừng! ${rewardMessages[rewardAmount]}`);
-        } else if (rewardAmount > 0) {
-            // Người chơi không nhận thưởng
-            showPopup(`Bạn đã đạt ${score} điểm! Tiếp tục cố gắng để thử vận may.`);
+    // Lấy email của người dùng đã đăng nhập
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            email = user.email; // Sửa đổi biến toàn cục
+            document.getElementById("userNameDisplay").textContent = email; // Hiển thị email
+            getScore(email); // Lấy điểm số cho người dùng
         } else {
-            // Dưới 1000 điểm
-            showPopup(`Bạn đã đạt ${score} điểm! Tiếp tục cố gắng để nhận phần thưởng.`);
+            console.log("No user is signed in.");
         }
+    });
 
-        // Kết nối ví và gửi thưởng nếu có
-        connectWallet().then((walletAddress) => {
-            if (walletAddress && isLucky) {
-                sendReward(walletAddress, rewardAmount);
+
+    // Lấy email của người dùng đã đăng nhập
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            email = user.email; // Sửa đổi biến toàn cục
+            document.getElementById("userNameDisplay").textContent = email; // Hiển thị email
+            getScore(email); // Lấy điểm số cho người dùng
+        } else {
+            console.log("No user is signed in.");
+        }
+    });
+
+    // Trong hàm checkForGameOver
+    function checkForGameOver() {
+        let zeros = 0;
+        for (let i = 0; i < squares.length; i++) {
+            if (squares[i].innerHTML == 0) {
+                zeros++;
             }
-        });
-
-        // Lưu điểm số
-        if (email) {
-            saveScore(email, score).then(() => {
-                console.log("Điểm số đã được lưu.");
-            }).catch((error) => {
-                console.error("Lỗi khi lưu điểm:", error);
-            });
-        } else {
-            console.error("Không có email để lưu điểm.");
         }
+        if (zeros === 0) {
+            console.log("Trò chơi kết thúc: Không còn số 0");
+            console.log("Điểm số cuối cùng trước khi lưu:", score);
 
-        // Kết thúc trò chơi
-        document.removeEventListener("keydown", control);
-        setTimeout(clear, 3000);
+            let rewardAmount = 0;
+
+            // Liên kết điểm với thông báo
+            const rewardMessages = {
+                1: "Bạn đã đạt 1000 điểm! Nhận 1 phần thưởng.",
+                2: "Bạn đã đạt 2000 điểm! Nhận 2 phần thưởng.",
+                3: "Bạn đã đạt 5000 điểm! Nhận 3 phần thưởng."
+            };
+
+            if (score >= 5000) {
+                rewardAmount = 3;
+            } else if (score >= 2000) {
+                rewardAmount = 2;
+            } else if (score >= 1000) {
+                rewardAmount = 1;
+            }
+
+            // Random xác suất nhận phần thưởng
+            const isLucky = Math.random() < 0.5; // 50% cơ hội nhận quà
+
+            if (rewardAmount > 0 && isLucky) {
+                // Người chơi may mắn nhận thưởng
+                showPopup(`Chúc mừng! ${rewardMessages[rewardAmount]}`);
+            } else if (rewardAmount > 0) {
+                // Người chơi không nhận thưởng
+                showPopup(`Bạn đã đạt ${score} điểm! Tiếp tục cố gắng để thử vận may.`);
+            } else {
+                // Dưới 1000 điểm
+                showPopup(`Bạn đã đạt ${score} điểm! Tiếp tục cố gắng để nhận phần thưởng.`);
+            }
+
+            // Kết nối ví và gửi thưởng nếu có
+            connectWallet().then((walletAddress) => {
+                if (walletAddress && isLucky) {
+                    sendReward(walletAddress, rewardAmount);
+                }
+            });
+
+            // Lưu điểm số
+            if (email) {
+                saveScore(email, score).then(() => {
+                    console.log("Điểm số đã được lưu.");
+                }).catch((error) => {
+                    console.error("Lỗi khi lưu điểm:", error);
+                });
+            } else {
+                console.error("Không có email để lưu điểm.");
+            }
+
+            // Kết thúc trò chơi
+            document.removeEventListener("keydown", control);
+            setTimeout(clear, 3000);
+        }
     }
-}
 
 
 
 
 
-    
-async function getHighScore(email) {
-    const docRef = doc(db, "scores", email);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-        const scoreData = docSnap.data();
-        document.getElementById("highScoreDisplay").textContent = scoreData.highScore || 0; // Hiển thị điểm số cao nhất
-    } else {
-        console.log("No high score document!");
+
+    async function getHighScore(email) {
+        const docRef = doc(db, "scores", email);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            const scoreData = docSnap.data();
+            document.getElementById("highScoreDisplay").textContent = scoreData.highScore || 0; // Hiển thị điểm số cao nhất
+        } else {
+            console.log("No high score document!");
+        }
     }
-}
 
-async function saveScore(email, score) {
-    const docRef = doc(db, "scores", email);
-    const docSnap = await getDoc(docRef);
-    
-    if (docSnap.exists()) {
-        // Nếu đã có tài liệu, cập nhật điểm số nếu điểm số mới cao hơn
-        const existingScore = docSnap.data().score || 0;
-        const highScore = Math.max(existingScore, score);
-        await setDoc(docRef, { score: score, highScore: highScore });
-    } else {
-        // Nếu chưa có tài liệu, tạo mới
-        await setDoc(docRef, { score: score, highScore: score });
+    async function saveScore(email, score) {
+        const docRef = doc(db, "scores", email);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+            // Nếu đã có tài liệu, cập nhật điểm số nếu điểm số mới cao hơn
+            const existingScore = docSnap.data().score || 0;
+            const highScore = Math.max(existingScore, score);
+            await setDoc(docRef, { score: score, highScore: highScore });
+        } else {
+            // Nếu chưa có tài liệu, tạo mới
+            await setDoc(docRef, { score: score, highScore: score });
+        }
     }
-}
 
-    
+
 
 
     function clear() {
@@ -417,33 +457,39 @@ async function saveScore(email, score) {
         const popup = document.getElementById("game-over-popup");
         const messageDisplay = document.getElementById("game-over-message");
         const okButton = document.getElementById("ok-button");
-    
+
         messageDisplay.textContent = message;
         popup.classList.remove("hidden");
-    
+
         // Xử lý khi nhấn nút OK
         okButton.onclick = () => {
             popup.classList.add("hidden");
             restartGame(); // Gọi hàm khởi động lại trò chơi
         };
     }
-    
+
     function restartGame() {
-        // Xóa nội dung các ô
+        // Reset trạng thái các ô
         squares.forEach(square => (square.innerHTML = 0));
         score = 0;
+
+        // Cập nhật giao diện
+        scoreDisplay.textContent = score;
         document.getElementById("score").textContent = score;
-    
-        // Tạo bảng mới
+
+        // Tạo lại bảng mới với hai ô khởi tạo
         generate();
         generate();
-    
-        // Thêm lại sự kiện bàn phím
+
+        // Kích hoạt lại sự kiện bàn phím
         document.addEventListener("keydown", control);
+
+        console.log("New game started!");
     }
+
     async function connectWallet() {
         const provider = window.solana;
-    
+
         if (provider && provider.isPhantom) {
             try {
                 const response = await provider.connect();
@@ -457,13 +503,13 @@ async function saveScore(email, score) {
             alert("Vui lòng cài đặt ví Phantom.");
         }
     }
-    
+
     async function sendReward(walletAddress, amount) {
         const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl('mainnet-beta'), 'confirmed');
-        
+
         const fromWallet = solanaWeb3.Keypair.generate(); // Ví bạn sử dụng để gửi token
         const toWallet = new solanaWeb3.PublicKey(walletAddress);
-    
+
         // Số lượng token (cần phải có token đã được tạo trên mạng)
         const transaction = new solanaWeb3.Transaction().add(
             solanaWeb3.SystemProgram.transfer({
@@ -472,16 +518,16 @@ async function saveScore(email, score) {
                 lamports: amount * solanaWeb3.LAMPORTS_PER_SOL, // Chuyển đổi SOL sang lamports
             })
         );
-    
+
         const signature = await solanaWeb3.sendAndConfirmTransaction(connection, transaction, {
             signers: [fromWallet],
         });
-    
+
         console.log("Đã gửi phần thưởng:", signature);
     }
-    
-    
-    
+
+
+
 
     //add colours
     function addColours() {
