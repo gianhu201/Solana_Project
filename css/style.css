@@ -59,6 +59,13 @@ h2 {
   border-radius: 3px;
   background-color: #8f7a66;
   color: #fff;
+    display: block;
+    text-align: center;
+    width: 70px;
+    height: 60px;
+    border-radius: 3px;
+    background-color: #8f7a66;
+    color: #FFF;
 }
 
 #score {
@@ -76,6 +83,13 @@ h2 {
   border: 2px solid #ccc;
   border-radius: 6px;
   padding: 20px;
+    width: 300px;
+    margin-top: 30px;
+    background-color: #f3f3f3;
+    border: 2px solid #ccc;
+    border-radius: 6px;
+    padding: 20px;
+    margin-left: 100px;
 }
 
 .leaderboard h2 {

@@ -510,12 +510,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const fromWallet = solanaWeb3.Keypair.generate(); // Ví bạn sử dụng để gửi token
         const toWallet = new solanaWeb3.PublicKey(walletAddress);
 
-        // Số lượng token (cần phải có token đã được tạo trên mạng)
+        
         const transaction = new solanaWeb3.Transaction().add(
             solanaWeb3.SystemProgram.transfer({
                 fromPubkey: fromWallet.publicKey,
                 toPubkey: toWallet,
-                lamports: amount * solanaWeb3.LAMPORTS_PER_SOL, // Chuyển đổi SOL sang lamports
+                lamports: amount * solanaWeb3.LAMPORTS_PER_SOL, 
             })
         );
 
