@@ -464,8 +464,6 @@ document.addEventListener("DOMContentLoaded", () => {
         // Xử lý khi nhấn nút OK
         okButton.onclick = () => {
             popup.classList.add("hidden");
-
-
             restartGame();
         };
     }
