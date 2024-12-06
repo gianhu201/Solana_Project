@@ -52,6 +52,7 @@ p, h2 {
 }
 
 .score-container {
+    display: block;
     text-align: center;
     width: 70px;
     height: 60px;
@@ -75,7 +76,7 @@ p, h2 {
     border: 2px solid #ccc;
     border-radius: 6px;
     padding: 20px;
-    margin-left: 30px;
+    margin-left: 100px;
 }
 
 .leaderboard h2 {
