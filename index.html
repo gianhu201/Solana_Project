@@ -1,87 +1,99 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>2048</title>
 
     <link rel="stylesheet" href="css/style.css" />
-    
+
     <script type="module" src="js/app.js"></script>
-    <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
-    <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
-    <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+    <script
+      type="module"
+      src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"
+    ></script>
+    <script
+      type="module"
+      src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"
+    ></script>
+    <script
+      type="module"
+      src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"
+    ></script>
     <script src="https://unpkg.com/@solana/web3.js@latest/dist/web3.min.js"></script>
     <script src="https://unpkg.com/@solana/spl-token@latest/dist/spl-token.min.js"></script>
-    
-</head>
+  </head>
 
-<body>
-
+  <body>
     <div class="container">
-        <div class="info">
-            <h1>2048</h1>
-            <div class="user-info">
-                <h2 id="username">User: <p id="userNameDisplay"></p></h2>
-                <h2>High Score: <span id="highScoreDisplay">0</span></h2>
-                <p class="score-title">Your Score: <span id="user-score">0</span></p>
-                <button style="margin-top: 10px;"  id="connect-button">Kết Nối Ví Phantom</button> <!-- Nút kết nối ví -->
-                <button style="margin-top: 10px;" id="new-game-button">New Game</button> 
-                <button id="logout-button">Log Out</button> 
-            </div>
-            <div class="score-container">
-                <p class="score-title">score</p>
-                <h2 id="score">0</h2>
-            </div>
+      <div class="info">
+        <h1>2048</h1>
+        <div class="user-info">
+          <h2 id="username">
+            User:
+            <p id="userNameDisplay"></p>
+          </h2>
+          <h2>High Score: <span id="highScoreDisplay">0</span></h2>
+          <p class="score-title">Your Score: <span id="user-score">0</span></p>
+          <div class="score-container">
+            <p class="score-title">score</p>
+            <h2 id="score">0</h2>
+          </div>
+          <button style="margin-top: 10px" id="connect-button">
+            Kết Nối Ví Phantom
+          </button>
+          <!-- Nút kết nối ví -->
+          <button style="margin-top: 10px" id="new-game-button">
+            New Game
+          </button>
+          <button id="logout-button">Log Out</button>
         </div>
-        <p id="result">Join the numbers and get to the <b>2048</b> tile!</p>
-        <div class="grid"></div>
+      </div>
+      <p id="result">Join the numbers and get to the <b>2048</b> tile!</p>
+      <div class="grid"></div>
     </div>
     <div class="leaderboard">
-        <h2>Leaderboard</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Player</th>
-                    <th>Score</th>
-                </tr>
-            </thead>
-            <tbody id="leaderboard-body">
-           
-            </tbody>
-        </table>
-        
+      <h2>Leaderboard</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Player</th>
+            <th>Score</th>
+          </tr>
+        </thead>
+        <tbody id="leaderboard-body"></tbody>
+      </table>
     </div>
-    <div>
-        
-    </div>
+    <div></div>
     <div id="game-over-popup" class="popup hidden">
-        <div class="popup-content">
-            <p id="game-over-message"></p>
-            <button id="ok-button">OK</button>
-        </div>
+      <div class="popup-content">
+        <p id="game-over-message"></p>
+        <button id="ok-button">OK</button>
+      </div>
     </div>
 
     <script type="module">
-        document.getElementById("connect-button").onclick = async () => {
-            const provider = window.solana;
+      document.getElementById("connect-button").onclick = async () => {
+        const provider = window.solana;
 
-            if (provider && provider.isPhantom) {
-                try {
-                    const response = await provider.connect();
-                    console.log("Kết nối ví thành công:", response.publicKey.toString());
-                    alert("Kết nối ví thành công: " + response.publicKey.toString());
-                } catch (err) {
-                    console.error("Kết nối bị từ chối:", err);
-                    alert("Bạn đã từ chối yêu cầu kết nối. Vui lòng cho phép kết nối ví để tiếp tục.");
-                }
-            } else {
-                alert("Vui lòng cài đặt ví Phantom.");
-            }
-        };
+        if (provider && provider.isPhantom) {
+          try {
+            const response = await provider.connect();
+            console.log(
+              "Kết nối ví thành công:",
+              response.publicKey.toString()
+            );
+            alert("Kết nối ví thành công: " + response.publicKey.toString());
+          } catch (err) {
+            console.error("Kết nối bị từ chối:", err);
+            alert(
+              "Bạn đã từ chối yêu cầu kết nối. Vui lòng cho phép kết nối ví để tiếp tục."
+            );
+          }
+        } else {
+          alert("Vui lòng cài đặt ví Phantom.");
+        }
+      };
     </script>
     <!-- Bootstrap JavaScript Libraries -->
-    
-</body>
-
+  </body>
 </html>
