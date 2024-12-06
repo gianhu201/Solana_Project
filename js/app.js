@@ -464,27 +464,14 @@ document.addEventListener("DOMContentLoaded", () => {
         // Xử lý khi nhấn nút OK
         okButton.onclick = () => {
             popup.classList.add("hidden");
-            restartGame(); // Gọi hàm khởi động lại trò chơi
+
+
+            restartGame();
         };
     }
 
     function restartGame() {
-        // Reset trạng thái các ô
-        squares.forEach(square => (square.innerHTML = 0));
-        score = 0;
-
-        // Cập nhật giao diện
-        scoreDisplay.textContent = score;
-        document.getElementById("score").textContent = score;
-
-        // Tạo lại bảng mới với hai ô khởi tạo
-        generate();
-        generate();
-
-        // Kích hoạt lại sự kiện bàn phím
-        document.addEventListener("keydown", control);
-
-        console.log("New game started!");
+        location.reload(true);
     }
 
     async function connectWallet() {
