@@ -75,6 +75,7 @@ p, h2 {
     border: 2px solid #ccc;
     border-radius: 6px;
     padding: 20px;
+    margin-left: 30px;
 }
 
 .leaderboard h2 {
