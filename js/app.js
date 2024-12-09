@@ -1,5 +1,7 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
 
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+import bs58 from 'https://cdn.jsdelivr.net/npm/bs58@6.0.0/+esm'
+console.log("bs58:", bs58); 
 import {
     getFirestore,
     doc,
@@ -50,7 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
             console.log("No user is signed in.");
         }
     });
-
+    const Buffer = window.Buffer;
 
     async function getScore(email) {
         const docRef = doc(db, "scores", email);
@@ -90,6 +92,53 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("new-game-button").addEventListener("click", () => {
         restartGame();
     });
+    async function connectWallet() {
+        const provider = window.solana;
+
+        if (provider && provider.isPhantom) {
+            try {
+                const response = await provider.connect();
+                console.log("Kết nối ví thành công:", response.publicKey.toString());
+                return response.publicKey.toString();
+            } catch (err) {
+                console.error("Kết nối bị từ chối:", err);
+                alert("Bạn đã từ chối yêu cầu kết nối. Vui lòng cho phép kết nối ví để tiếp tục.");
+            }
+        } else {
+            alert("Vui lòng cài đặt ví Phantom.");
+        }
+    }
+    async function requestSolFromFaucet(walletAddress, amount) {
+        const faucetUrl = "https://api.devnet.solana.com"; // API của mạng devnet
+        const response = await fetch(faucetUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                jsonrpc: "2.0",
+                id: 1,
+                method: "requestAirdrop",
+                params: [
+                    walletAddress,
+                    solanaWeb3.LAMPORTS_PER_SOL * amount // chuyển đổi SOL sang lamports
+                ],
+            }),
+        });
+    
+        const result = await response.json();
+        if (result.error) {
+            console.error("Không thể nhận SOL từ faucet:", result.error);
+            showPopup("Có lỗi khi yêu cầu SOL từ faucet. Vui lòng thử lại.");
+        } else {
+            console.log("Đã gửi", amount, "SOL test đến:", walletAddress);
+            showPopup(`Bạn đã nhận ${amount} SOL`);
+        }
+    }
+
+  
+    
+
 
     // create the playing board
     function createBoard() {
@@ -286,13 +335,13 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
     }
-    function checkForWin() {
+    async function checkForWin() {
         for (let i = 0; i < squares.length; i++) {
             if (squares[i].innerHTML == 2048) {
                 // Hiển thị popup thông báo thắng
                 showPopup("You WIN!");
                 document.removeEventListener("keydown", control);
-
+    
                 // Lưu điểm nếu có email
                 if (email) {
                     saveScore(email, score).then(() => {
@@ -303,22 +352,30 @@ document.addEventListener("DOMContentLoaded", () => {
                 } else {
                     console.error("Không có email để lưu điểm.");
                 }
-
+    
                 // Xác định tỷ lệ nhận phần thưởng (50%)
-                const rewardChance = Math.random() < 0.5; // 50% tỷ lệ
+                const rewardChance = Math.random() < 1; // 50% tỷ lệ
                 if (rewardChance) {
                     showPopup("Congratulations! You've received a reward! Keep playing for more rewards.");
+    
+                 
+                    connectWallet().then((walletAddress) => {
+                        if (walletAddress) {
+                            requestSolFromFaucet(walletAddress, 0.3); // Gửi 0.3 SOL test
+                        }
+                    });
                 } else {
                     showPopup("You've won! Keep playing to try your luck for a reward.");
                 }
-
+    
                 // Cho phép tiếp tục chơi
                 continueGame();
-
+    
                 return; // Thoát khỏi hàm khi điều kiện thắng được xử lý
             }
         }
     }
+    
     // Hàm tiếp tục trò chơi
     function continueGame() {
         // Cho phép người chơi tiếp tục di chuyển
@@ -379,7 +436,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             // Random xác suất nhận phần thưởng
-            const isLucky = Math.random() < 0.5; // 50% cơ hội nhận quà
+            const isLucky = Math.random() < 1; // 50% cơ hội nhận quà
 
             if (rewardAmount > 0 && isLucky) {
                 // Người chơi may mắn nhận thưởng
@@ -395,9 +452,23 @@ document.addEventListener("DOMContentLoaded", () => {
             // Kết nối ví và gửi thưởng nếu có
             connectWallet().then((walletAddress) => {
                 if (walletAddress && isLucky) {
-                    sendReward(walletAddress, rewardAmount);
+                    let solRewardAmount = 0;
+            
+                    if (rewardAmount === 3) {
+                        solRewardAmount = 0.3; // 0.3 SOL cho 5000 điểm trở lên
+                    } else if (rewardAmount === 2) {
+                        solRewardAmount = 0.2; // 0.2 SOL cho 2000 điểm trở lên
+                    } else if (rewardAmount === 1) {
+                        solRewardAmount = 0.1; // 0.1 SOL cho 1000 điểm trở lên
+                    }
+            
+                    if (solRewardAmount > 0) {
+                        // Gọi hàm yêu cầu SOL test từ faucet
+                        requestSolFromFaucet(walletAddress, solRewardAmount);
+                    }
                 }
             });
+
 
             // Lưu điểm số
             if (email) {
@@ -472,44 +543,6 @@ document.addEventListener("DOMContentLoaded", () => {
         location.reload(true);
     }
 
-    async function connectWallet() {
-        const provider = window.solana;
-
-        if (provider && provider.isPhantom) {
-            try {
-                const response = await provider.connect();
-                console.log("Kết nối ví thành công:", response.publicKey.toString());
-                return response.publicKey.toString();
-            } catch (err) {
-                console.error("Kết nối bị từ chối:", err);
-                alert("Bạn đã từ chối yêu cầu kết nối. Vui lòng cho phép kết nối ví để tiếp tục.");
-            }
-        } else {
-            alert("Vui lòng cài đặt ví Phantom.");
-        }
-    }
-
-    async function sendReward(walletAddress, amount) {
-        const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl('mainnet-beta'), 'confirmed');
-
-        const fromWallet = solanaWeb3.Keypair.generate(); // Ví bạn sử dụng để gửi token
-        const toWallet = new solanaWeb3.PublicKey(walletAddress);
-
-        
-        const transaction = new solanaWeb3.Transaction().add(
-            solanaWeb3.SystemProgram.transfer({
-                fromPubkey: fromWallet.publicKey,
-                toPubkey: toWallet,
-                lamports: amount * solanaWeb3.LAMPORTS_PER_SOL, 
-            })
-        );
-
-        const signature = await solanaWeb3.sendAndConfirmTransaction(connection, transaction, {
-            signers: [fromWallet],
-        });
-
-        console.log("Đã gửi phần thưởng:", signature);
-    }
 
 
     // Xử lý sự kiện khi người dùng nhấn nút Log Out
