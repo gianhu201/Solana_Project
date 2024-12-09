@@ -19,7 +19,7 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth
 
 
 document.addEventListener("DOMContentLoaded", () => {
-    const gridDisplay = document.querySelector(".game-content")
+    const gridDisplay = document.querySelector(".grid")
     const scoreDisplay = document.querySelector("#score")
     const resultDisplay = document.querySelector("#result")
 
