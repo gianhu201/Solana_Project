@@ -1,8 +1,12 @@
 body {
   background-color: #faf8ef;
+  width: 100%;
+}
+
+.game-body {
   display: flex;
-  justify-content: center;
-  font-family: "Clear Sans", Helvetica, serif;
+  width: 100%;
+  padding-top: 100px;
 }
 
 h1 {
@@ -17,18 +21,12 @@ h2 {
   margin: 0;
 }
 
-.container {
-  width: 468px;
-  margin-top: 30px;
-  margin-right: 20px;
-}
+
 .info {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 20px;
+  padding: 20px;
 }
 
-.grid {
+.game-content {
   display: flex;
   flex-wrap: wrap;
   width: 456px;
@@ -37,9 +35,10 @@ h2 {
   border: 7px solid #bbada0;
   border-radius: 6px;
   margin-top: 20px;
+  padding: 20px;
 }
 
-.grid div {
+.game-content div {
   width: 100px;
   height: 100px;
   margin: 7px;
@@ -59,13 +58,13 @@ h2 {
   border-radius: 3px;
   background-color: #8f7a66;
   color: #fff;
-    display: block;
-    text-align: center;
-    width: 70px;
-    height: 60px;
-    border-radius: 3px;
-    background-color: #8f7a66;
-    color: #FFF;
+  display: block;
+  text-align: center;
+  width: 70px;
+  height: 60px;
+  border-radius: 3px;
+  background-color: #8f7a66;
+  color: #FFF;
 }
 
 #score {
@@ -75,21 +74,25 @@ h2 {
 .score-title {
   font-size: 16px;
 }
+
 /* bảng người chơi */
+
+.top-list {
+  padding: 0 100px 0 100px;
+}
+
 .leaderboard {
   width: 300px;
   margin-top: 30px;
   background-color: #f3f3f3;
   border: 2px solid #ccc;
   border-radius: 6px;
+  width: 300px;
+  margin-top: 30px;
+  background-color: #f3f3f3;
+  border: 2px solid #ccc;
+  border-radius: 6px;
   padding: 20px;
-    width: 300px;
-    margin-top: 30px;
-    background-color: #f3f3f3;
-    border: 2px solid #ccc;
-    border-radius: 6px;
-    padding: 20px;
-    margin-left: 100px;
 }
 
 .leaderboard h2 {
@@ -160,6 +163,7 @@ table tr:last-child td {
 .hidden {
   display: none;
 }
+
 /* Đặt kiểu dáng chung cho cả hai nút */
 button {
   font-family: "Arial", sans-serif;
@@ -176,64 +180,67 @@ button {
 
 /* Kiểu dáng nút kết nối ví */
 #connect-button {
-  background: linear-gradient(
-    135deg,
-    #4caf50,
-    #8bc34a
-  ); /* Màu gradient xanh lá */
-  color: white; /* Chữ màu trắng */
+  background: linear-gradient(135deg,
+      #4caf50,
+      #8bc34a);
+  /* Màu gradient xanh lá */
+  color: white;
+  /* Chữ màu trắng */
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 #connect-button:hover {
-  background: linear-gradient(
-    135deg,
-    #43a047,
-    #76c044
-  ); /* Tông màu đậm hơn khi hover */
-  transform: scale(1.05); /* Tăng kích thước nhẹ khi hover */
+  background: linear-gradient(135deg,
+      #43a047,
+      #76c044);
+  /* Tông màu đậm hơn khi hover */
+  transform: scale(1.05);
+  /* Tăng kích thước nhẹ khi hover */
   box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* Kiểu dáng nút New Game */
 #new-game-button {
-  background: linear-gradient(
-    135deg,
-    #2196f3,
-    #64b5f6
-  ); /* Màu gradient xanh dương */
-  color: white; /* Chữ màu trắng */
+  background: linear-gradient(135deg,
+      #2196f3,
+      #64b5f6);
+  /* Màu gradient xanh dương */
+  color: white;
+  /* Chữ màu trắng */
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 #new-game-button:hover {
-  background: linear-gradient(
-    135deg,
-    #1e88e5,
-    #42a5f5
-  ); /* Tông màu đậm hơn khi hover */
-  transform: scale(1.05); /* Tăng kích thước nhẹ khi hover */
+  background: linear-gradient(135deg,
+      #1e88e5,
+      #42a5f5);
+  /* Tông màu đậm hơn khi hover */
+  transform: scale(1.05);
+  /* Tăng kích thước nhẹ khi hover */
   box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* Kiểu dáng khi nút được bấm */
 button:active {
-  transform: scale(0.95); /* Nhấn vào nút thì thu nhỏ nhẹ */
+  transform: scale(0.95);
+  /* Nhấn vào nút thì thu nhỏ nhẹ */
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* Kiểu cho trạng thái focus */
 button:focus {
-  outline: 2px solid #ff9800; /* Viền focus màu cam */
+  outline: 2px solid #ff9800;
+  /* Viền focus màu cam */
   outline-offset: 4px;
 }
+
 #logout-button {
-  background: linear-gradient(
-    135deg,
-    #ff5722,
-    #ff7043
-  ); /* Màu gradient đỏ cam */
-  color: white; /* Chữ màu trắng */
+  background: linear-gradient(135deg,
+      #ff5722,
+      #ff7043);
+  /* Màu gradient đỏ cam */
+  color: white;
+  /* Chữ màu trắng */
   font-family: "Arial", sans-serif;
   font-size: 16px;
   font-weight: bold;
@@ -246,11 +253,10 @@ button:focus {
 }
 
 #logout-button:hover {
-  background: linear-gradient(
-    135deg,
-    #e64a19,
-    #ff7043
-  ); /* Tông màu đậm hơn khi hover */
+  background: linear-gradient(135deg,
+      #e64a19,
+      #ff7043);
+  /* Tông màu đậm hơn khi hover */
   transform: scale(1.05);
   box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.2);
 }

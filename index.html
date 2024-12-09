@@ -5,6 +5,11 @@
   <meta charset="UTF-8" />
   <title>2048</title>
 
+<head>
+  <meta charset="UTF-8" />
+  <title>2048</title>
+
+  <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/style.css" />
 
   <!-- Firebase Libraries -->
@@ -75,6 +80,31 @@
   <script type="module">
     document.getElementById("connect-button").onclick = async () => {
       const provider = window.solana;
+  <script type="module">
+    document.getElementById("connect-button").onclick = async () => {
+      const provider = window.solana;
+
+      if (provider && provider.isPhantom) {
+        try {
+          const response = await provider.connect();
+          console.log(
+            "Kết nối ví thành công:",
+            response.publicKey.toString()
+          );
+          alert("Kết nối ví thành công: " + response.publicKey.toString());
+        } catch (err) {
+          console.error("Kết nối bị từ chối:", err);
+          alert(
+            "Bạn đã từ chối yêu cầu kết nối. Vui lòng cho phép kết nối ví để tiếp tục."
+          );
+        }
+      } else {
+        alert("Vui lòng cài đặt ví Phantom.");
+      }
+    };
+  </script>
+  <!-- Bootstrap JavaScript Libraries -->
+</body>
 
       if (provider && provider.isPhantom) {
         try {
