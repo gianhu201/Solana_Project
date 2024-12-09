@@ -436,7 +436,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             // Random xác suất nhận phần thưởng
-            const isLucky = Math.random() < 1; // 50% cơ hội nhận quà
+            const isLucky = Math.random() < 0.7; // 50% cơ hội nhận quà
 
             if (rewardAmount > 0 && isLucky) {
                 // Người chơi may mắn nhận thưởng
